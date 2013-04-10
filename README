@@ -1,0 +1,91 @@
+NAME
+    SQL::QueryBuilder - Yet another SQL builder that is similar in syntax to
+    SQL
+
+SYNOPSIS
+        use SQL::QueryBuilder;
+
+        my ($stmt, @bind) = SQL::QueryBuilder
+            ->select(qw/user_id name/)
+            ->from('user')
+            ->where('user_id = ?', 1)
+            ->to_sql
+        ;
+        # $stmt: SELECT user_id, name FROM user
+        # @bind: (1)
+
+        my ($stmt, @bind) = SQL::QueryBuilder
+            ->select(
+                'user_id',
+                ['LEFT(name, ?)', 'name', 5],
+            )
+            ->from('user', 'u')
+            ->left_join(
+                SQL::QueryBuilder
+                    ->select('user_id', 'SUM(balance) AS balance')
+                    ->from('balance')
+                    ->where
+                        ->or('group_id = ?', 1)
+                        ->or('group_id = ?', 2)
+                        ->parent
+                    ->group_by('user_id')
+                , 'b'
+            )->on
+                ->and('u.user_id = b.user_id')
+                ->and('b.balance > 0')
+                ->parent
+            ->parent
+            ->where
+                ->and('u.user_id = ?', $user_id)
+                ->and('b.balance BETWEEN ? AND ?', 100, 200)
+                ->parent
+            ->group_by('LEFT(name, ?)', undef, 2)
+        ;
+        # $stmt: SELECT
+        #   user_id,
+        #   LEFT(name, ?) AS name
+        # FROM
+        #   user u
+        #   LEFT JOIN (
+        #     SELECT
+        #       user_id,
+        #       SUM(balance) AS balance
+        #     FROM
+        #       balance
+        #     WHERE
+        #       group_id = ?
+        #       OR group_id = ?
+        #     GROUP BY user_id
+        #   ) AS b
+        #   ON
+        #     u.user_id = b.user_id
+        #     AND b.balance > 0
+        # WHERE
+        #   u.user_id = ?
+        #   AND b.balance BETWEEN ? AND ?
+        # GROUP BY LEFT(name, ?)'
+        # @bind: (5, 1, 2, 101, 100, 200, 2)
+
+DESCRIPTION
+    SQL::QueryBuilder is yet another SQL builder class.
+
+METHODS
+    new(<%options>)
+        Create instance.
+
+        my $query = SQL::QueryBuilder->new()
+
+    to_sql(<indent>)
+        Build SQL.
+
+        my ($stmt, @bind) = $query->to_sql()
+
+AUTHOR
+        Yuriy Ustushenko, <<yoreek@yahoo.com>>
+
+COPYRIGHT AND LICENSE
+    Copyright (C) 2013 Yuriy Ustushenko
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
