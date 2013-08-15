@@ -10,14 +10,14 @@ use strict;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-	NAME          => 'SQL::QueryBuilder',
-	VERSION_FROM  => 'lib/SQL/QueryBuilder.pm',
-	ABSTRACT_FROM => 'lib/SQL/QueryBuilder.pm',
-	AUTHOR        => 'Yuriy Ustushenko <yoreek@yahoo.com>',
-	LICENSE       => "perl",
-	PREREQ_PM     => {
-		'List::Util'   => 0,
-		'Scalar::Util' => 0,
-		'Test::More'   => 0,
-	},
+    NAME          => 'SQL::QueryBuilder',
+    VERSION_FROM  => 'lib/SQL/QueryBuilder.pm',
+    ABSTRACT_FROM => 'lib/SQL/QueryBuilder.pm',
+    AUTHOR        => 'Yuriy Ustushenko <yoreek@yahoo.com>',
+    LICENSE       => "perl",
+    PREREQ_PM     => {
+        'List::Util'   => 0,
+        'Scalar::Util' => 0,
+        'Test::More'   => 0,
+    },
 );
