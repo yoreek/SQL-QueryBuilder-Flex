@@ -20,7 +20,7 @@ use_ok($package);
     my ($sql, @params) = $b->to_sql();
     is
         $sql,
-        'SELECT SQL_NO_CACHE DISTINCT name, email FROM user u',
+        'SELECT DISTINCT SQL_NO_CACHE name, email FROM user u',
         'checking SELECT options'
     ;
 }

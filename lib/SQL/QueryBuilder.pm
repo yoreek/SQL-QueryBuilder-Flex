@@ -219,7 +219,7 @@ sub _build_select {
     my ($self, $writer, $indent) = @_;
 
     $writer->write(
-        join(' ', 'SELECT', keys %{ $self->{options} })
+        join(' ', 'SELECT', sort keys %{ $self->{options} })
         , $indent
     );
 
