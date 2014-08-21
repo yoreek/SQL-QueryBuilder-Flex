@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder';
+my $package = 'SQL::QueryBuilder::Flex';
 use_ok($package);
 
 
@@ -20,8 +20,7 @@ use_ok($package);
             ->on
                 ->and('g.group_id = u.group_id')
                 ->and('g.group_id = u.departament_id')
-                ->end
-            ->end
+        ->get_query
     ;
     my ($sql, @params) = $b->to_sql();
     is

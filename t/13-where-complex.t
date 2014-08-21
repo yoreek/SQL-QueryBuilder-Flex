@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 3;
 
-my $package = 'SQL::QueryBuilder';
+my $package = 'SQL::QueryBuilder::Flex';
 use_ok($package);
 
 {
@@ -19,11 +19,11 @@ use_ok($package);
             ->or('a = 1')
             ->or('b > ?', 2)
             ->and(
-                SQL::QueryBuilder::CondList->new
+                SQL::QueryBuilder::Flex::CondList->new
                     ->or('c != ?', 10)
                     ->or('c != ?', 12)
             )
-            ->end
+        ->get_query
     ;
     my ($sql, @params) = $b->to_sql();
     is

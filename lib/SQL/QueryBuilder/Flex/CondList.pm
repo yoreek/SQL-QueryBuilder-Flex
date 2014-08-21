@@ -1,8 +1,8 @@
-package SQL::QueryBuilder::CondList;
+package SQL::QueryBuilder::Flex::CondList;
 
 use strict;
 use warnings;
-use base 'SQL::QueryBuilder::Statement';
+use base 'SQL::QueryBuilder::Flex::Statement';
 
 sub new {
     my ($class, @options) = @_;

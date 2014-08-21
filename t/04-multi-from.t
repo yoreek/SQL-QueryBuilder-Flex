@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder';
+my $package = 'SQL::QueryBuilder::Flex';
 use_ok($package);
 
 

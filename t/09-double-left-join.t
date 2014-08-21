@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder';
+my $package = 'SQL::QueryBuilder::Flex';
 use_ok($package);
 
 {
@@ -15,8 +15,9 @@ use_ok($package);
             'email',
         )
         ->from('user', 'u')
-        ->left_join('group')->using('group_id')->end
-        ->left_join('departament')->using('departament_id')->end
+        ->left_join('group')->using('group_id')
+        ->left_join('departament')->using('departament_id')
+        ->get_query
     ;
     my ($sql, @params) = $b->to_sql();
     is

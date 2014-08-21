@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 7;
 
-my $package = 'SQL::QueryBuilder::Writer';
+my $package = 'SQL::QueryBuilder::Flex::Writer';
 use_ok($package);
 
 can_ok($package, qw/

@@ -5,11 +5,11 @@ use warnings;
 
 use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder';
+my $package = 'SQL::QueryBuilder::Flex';
 use_ok($package);
 
 can_ok($package, qw/
-    end
+    parent
     get_writer
     set_writer
     build
@@ -17,6 +17,11 @@ can_ok($package, qw/
     to_sql
     options
     select
+    update
+    union
+    insert
+    set
+    get_query
     from
     where
     having
@@ -42,4 +47,4 @@ can_ok($package, qw/
     delete_join
 /);
 
-diag( "Testing SQL::QueryBuilder $SQL::QueryBuilder::VERSION, Perl $], $^X" );
+diag( "Testing SQL::QueryBuilder::Flex $SQL::QueryBuilder::Flex::VERSION, Perl $], $^X" );

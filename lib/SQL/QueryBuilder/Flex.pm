@@ -1,14 +1,25 @@
-package SQL::QueryBuilder;
+package SQL::QueryBuilder::Flex;
 
 use strict;
 use warnings;
 use List::Util qw(first);
-use SQL::QueryBuilder::Join;
-use SQL::QueryBuilder::CondList;
-use SQL::QueryBuilder::Writer;
-use base 'SQL::QueryBuilder::Statement';
+use SQL::QueryBuilder::Flex::Join;
+use SQL::QueryBuilder::Flex::CondList;
+use SQL::QueryBuilder::Flex::Writer;
+use base 'SQL::QueryBuilder::Flex::Statement';
 
 our $VERSION = '0.01';
+
+sub get_query { $_[0] };
+
+sub import {
+    my ($class, $alias) = @_;
+
+    if ($alias) {
+        no strict 'refs';
+        *{ $alias =~ /::/ ? $alias : caller(0).'::'.$alias } = sub () { __PACKAGE__ };
+    }
+}
 
 sub new {
     my ($class, @options) = @_;
@@ -112,22 +123,22 @@ sub set {
 
 sub where {
     my ($self, $condition, @values) = @_;
-    my $cond_list = $self->{where} ||= SQL::QueryBuilder::CondList->new(
+    my $cond_list = $self->{where} ||= SQL::QueryBuilder::Flex::CondList->new(
         parent => $self,
     );
     return $condition
-        ? $cond_list->and($condition, @values)->end()
+        ? $cond_list->and($condition, @values)->parent()
         : $cond_list
     ;
 }
 
 sub having {
     my ($self, $condition, @values) = @_;
-    my $cond_list = $self->{having} ||= SQL::QueryBuilder::CondList->new(
+    my $cond_list = $self->{having} ||= SQL::QueryBuilder::Flex::CondList->new(
         parent => $self,
     );
     return $condition
-        ? $cond_list->and($condition, @values)->end()
+        ? $cond_list->and($condition, @values)->parent()
         : $cond_list
     ;
 }
@@ -180,7 +191,7 @@ sub union {
 
 sub _join {
     my ($self, @options) = @_;
-    my $join = SQL::QueryBuilder::Join->new(
+    my $join = SQL::QueryBuilder::Flex::Join->new(
         parent => $self,
         @options,
     );
@@ -550,13 +561,13 @@ __END__
 
 =head1 NAME
 
-SQL::QueryBuilder - Yet another SQL builder that is similar in syntax to SQL
+SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in syntax to SQL
 
 =head1 SYNOPSIS
 
-    use SQL::QueryBuilder;
+    use SQL::QueryBuilder::Flex;
 
-    my ($stmt, @bind) = SQL::QueryBuilder
+    my ($stmt, @bind) = SQL::QueryBuilder::Flex
         ->select(qw/user_id name/)
         ->from('user')
         ->where('user_id = ?', 1)
@@ -565,31 +576,31 @@ SQL::QueryBuilder - Yet another SQL builder that is similar in syntax to SQL
     # $stmt: SELECT user_id, name FROM user
     # @bind: (1)
 
-    my ($stmt, @bind) = SQL::QueryBuilder
+    my ($stmt, @bind) = SQL::QueryBuilder::Flex
         ->select(
             'user_id',
             ['LEFT(name, ?)', 'name', 5],
         )
         ->from('user', 'u')
         ->left_join(
-            SQL::QueryBuilder
-                ->select('user_id', 'SUM(balance) AS balance')
-                ->from('balance')
-                ->where
-                    ->or('group_id = ?', 1)
-                    ->or('group_id = ?', 2)
-                    ->end
-                ->group_by('user_id')
-            , 'b'
-        )->on
-            ->and('u.user_id = b.user_id')
-            ->and('b.balance > 0')
-            ->end
-        ->end
+                SQL::QueryBuilder::Flex
+                    ->select('user_id', 'SUM(balance) AS balance')
+                    ->from('balance')
+                    ->where
+                        ->or('group_id = ?', 1)
+                        ->or('group_id = ?', 2)
+                        ->parent
+                    ->group_by('user_id')
+                , 'b'
+            )->on
+                ->and('u.user_id = b.user_id')
+                ->and('b.balance > 0')
+            ->parent
+        ->parent
         ->where
             ->and('u.user_id = ?', $user_id)
             ->and('b.balance BETWEEN ? AND ?', 100, 200)
-            ->end
+        ->parent
         ->group_by('LEFT(name, ?)', undef, 2)
         ->to_sql
     ;
@@ -620,7 +631,7 @@ SQL::QueryBuilder - Yet another SQL builder that is similar in syntax to SQL
 
 =head1 DESCRIPTION
 
-SQL::QueryBuilder is yet another SQL builder class.
+SQL::QueryBuilder::Flex is yet another SQL builder class.
 
 =head1 METHODS
 
@@ -630,7 +641,7 @@ SQL::QueryBuilder is yet another SQL builder class.
 
 Create instance.
 
-my $query = SQL::QueryBuilder->new()
+my $query = SQL::QueryBuilder::Flex->new()
 
 =item to_sql(<indent>)
 

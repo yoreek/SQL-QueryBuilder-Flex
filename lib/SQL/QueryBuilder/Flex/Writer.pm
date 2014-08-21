@@ -1,4 +1,4 @@
-package SQL::QueryBuilder::Writer;
+package SQL::QueryBuilder::Flex::Writer;
 
 use strict;
 use warnings;
