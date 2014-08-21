@@ -3,13 +3,12 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 {
-    my $b = $package
+    my $q = Q
         ->select(
             'name',
             'email',
@@ -19,8 +18,8 @@ use_ok($package);
         ->right_join('departament')->using('departament_id')
         ->get_query
     ;
-    $b->delete_join('g')->delete_join(qr/^depar/);
-    my ($sql, @params) = $b->to_sql();
+    $q->delete_join('g')->delete_join(qr/^depar/);
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT name, email FROM user u',

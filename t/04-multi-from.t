@@ -3,19 +3,18 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 
 {
-    my $b = $package
+    my $q = Q
         ->select('u.name')
         ->from('user', 'u')
         ->from('group', 'g')
     ;
-    my ($sql, @params) = $b->to_sql();
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT u.name FROM user u, group g',

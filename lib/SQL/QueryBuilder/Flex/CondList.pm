@@ -49,6 +49,18 @@ sub or_in {
     return $self->or($condition, @params);
 }
 
+sub or_not_in {
+    my ($self, $name, @params) = @_;
+
+    unless (scalar @params) {
+        return $self->or('1');
+    }
+
+    my $condition = $name .' NOT IN('. join(',', ('?') x @params) .')';
+
+    return $self->or($condition, @params);
+}
+
 sub and {
     my ($self, $condition, @params) = @_;
 
@@ -76,6 +88,18 @@ sub and_in {
     }
 
     my $condition = $name .' IN('. join(',', ('?') x @params) .')';
+
+    return $self->and($condition, @params);
+}
+
+sub and_not_in {
+    my ($self, $name, @params) = @_;
+
+    unless (scalar @params) {
+        return $self->and('1');
+    }
+
+    my $condition = $name .' NOT IN('. join(',', ('?') x @params) .')';
 
     return $self->and($condition, @params);
 }

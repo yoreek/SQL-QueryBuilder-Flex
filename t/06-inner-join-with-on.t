@@ -3,14 +3,13 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 
 {
-    my $b = $package
+    my $q = Q
         ->select(
             'name',
             'email',
@@ -22,7 +21,7 @@ use_ok($package);
                 ->and('g.group_id = u.departament_id')
         ->get_query
     ;
-    my ($sql, @params) = $b->to_sql();
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT name, email FROM user u INNER JOIN group g ON g.group_id = u.group_id AND g.group_id = u.departament_id',

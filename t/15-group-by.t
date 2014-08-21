@@ -3,13 +3,12 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 {
-    my $b = $package
+    my $q = Q
         ->select(
             'name',
             'email',
@@ -17,7 +16,7 @@ use_ok($package);
         ->from('user', 'u')
         ->group_by('name')
     ;
-    my ($sql, @params) = $b->to_sql();
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT name, email FROM user u GROUP BY name',

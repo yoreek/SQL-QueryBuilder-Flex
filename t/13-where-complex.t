@@ -3,13 +3,12 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 {
-    my $b = $package
+    my $q = Q
         ->select(
             'name',
             'email',
@@ -18,14 +17,12 @@ use_ok($package);
         ->where
             ->or('a = 1')
             ->or('b > ?', 2)
-            ->and(
-                SQL::QueryBuilder::Flex::CondList->new
-                    ->or('c != ?', 10)
-                    ->or('c != ?', 12)
-            )
+            ->and_list
+                ->or('c != ?', 10)
+                ->or('c != ?', 12)
         ->get_query
     ;
-    my ($sql, @params) = $b->to_sql();
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT name, email FROM user u WHERE a = 1 OR b > ? AND ( c != ? OR c != ? )',

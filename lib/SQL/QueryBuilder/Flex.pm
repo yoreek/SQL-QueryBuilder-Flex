@@ -37,7 +37,6 @@ sub new {
         limit      => undef,
         options    => {},
         union      => [],
-        is_united  => undef,
         @options,
     );
     return $self;
@@ -182,10 +181,7 @@ sub offset {
 
 sub union {
     my ($self, $query) = @_;
-    $self->{is_united} = 1;
-    if (!$query->{is_united}) {
-        push @{ $self->{union} }, $query;
-    }
+    push @{ $self->{union} }, $query;
     return $self;
 }
 

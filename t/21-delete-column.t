@@ -3,13 +3,12 @@ use lib qw( lib );
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 2;
 
-my $package = 'SQL::QueryBuilder::Flex';
-use_ok($package);
+use SQL::QueryBuilder::Flex 'Q';
 
 {
-    my $b = $package
+    my $q = Q
         ->select(
             'name',
             'email',
@@ -17,8 +16,8 @@ use_ok($package);
         )
         ->from('user', 'u')
     ;
-    $b->delete_column('name')->delete_column(qr/note/);
-    my ($sql, @params) = $b->to_sql();
+    $q->delete_column('name')->delete_column(qr/note/);
+    my ($sql, @params) = $q->to_sql();
     is
         $sql,
         'SELECT email FROM user u',
