@@ -5,11 +5,11 @@ use warnings;
 
 use Test::More tests => 1;
 
-use SQL::QueryBuilder::Flex 'Q';
+use SQL::QueryBuilder::Flex 'SQL';
 
 
 {
-    my $q = Q
+    my $q = SQL
         ->select('u.name')
         ->from('user', 'u')
         ->from('group', 'g')

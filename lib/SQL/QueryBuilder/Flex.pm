@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use List::Util qw(first);
 use SQL::QueryBuilder::Flex::Join;
-use SQL::QueryBuilder::Flex::CondList;
+use SQL::QueryBuilder::Flex::Exp;
 use SQL::QueryBuilder::Flex::Writer;
 use base 'SQL::QueryBuilder::Flex::Statement';
 
@@ -121,24 +121,24 @@ sub set {
 }
 
 sub where {
-    my ($self, $condition, @values) = @_;
-    my $cond_list = $self->{where} ||= SQL::QueryBuilder::Flex::CondList->new(
+    my ($self, $cond, @values) = @_;
+    my $exp = $self->{where} ||= SQL::QueryBuilder::Flex::Exp->new(
         parent => $self,
     );
-    return $condition
-        ? $cond_list->and($condition, @values)->parent()
-        : $cond_list
+    return $cond
+        ? $exp->and($cond, @values)->parent()
+        : $exp
     ;
 }
 
 sub having {
-    my ($self, $condition, @values) = @_;
-    my $cond_list = $self->{having} ||= SQL::QueryBuilder::Flex::CondList->new(
+    my ($self, $cond, @values) = @_;
+    my $exp = $self->{having} ||= SQL::QueryBuilder::Flex::Exp->new(
         parent => $self,
     );
-    return $condition
-        ? $cond_list->and($condition, @values)->parent()
-        : $cond_list
+    return $cond
+        ? $exp->and($cond, @values)->parent()
+        : $exp
     ;
 }
 
@@ -561,9 +561,9 @@ SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in syntax to S
 
 =head1 SYNOPSIS
 
-    use SQL::QueryBuilder::Flex;
+    use SQL::QueryBuilder::Flex 'SQL';
 
-    my ($stmt, @bind) = SQL::QueryBuilder::Flex
+    my ($stmt, @bind) = SQL
         ->select(qw/user_id name/)
         ->from('user')
         ->where('user_id = ?', 1)
@@ -572,37 +572,49 @@ SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in syntax to S
     # $stmt: SELECT user_id, name FROM user
     # @bind: (1)
 
-    my ($stmt, @bind) = SQL::QueryBuilder::Flex
+
+    my ($stmt, @bind) = SQL
         ->select(
             'user_id',
+            'now() AS now',
             ['LEFT(name, ?)', 'name', 5],
+            {
+                name     => 'user_name',
+                group_id => 'group_id',
+            },
         )
-        ->from('user', 'u')
+        ->from(qw/user u/)
         ->left_join(
-                SQL::QueryBuilder::Flex
+                SQL
                     ->select('user_id', 'SUM(balance) AS balance')
                     ->from('balance')
                     ->where
                         ->or('group_id = ?', 1)
                         ->or('group_id = ?', 2)
-                        ->parent
                     ->group_by('user_id')
                 , 'b'
             )->on
                 ->and('u.user_id = b.user_id')
                 ->and('b.balance > 0')
-            ->parent
-        ->parent
         ->where
-            ->and('u.user_id = ?', $user_id)
+            ->and('u.user_id = ?', 7)
             ->and('b.balance BETWEEN ? AND ?', 100, 200)
-        ->parent
+            ->and_exp
+                ->or('group_id = ?', 1)
+                ->or('group_id = ?', 2)
+                ->or_in('group_id', 5, 6)
+            ->parent
         ->group_by('LEFT(name, ?)', undef, 2)
-        ->to_sql
+        ->order_by(qw/name desc/)
+        ->limit(10)
+        ->to_sql(1)
     ;
-    # $stmt: SELECT
+    # SELECT
     #   user_id,
-    #   LEFT(name, ?) AS name
+    #   now() AS now,
+    #   LEFT(name, ?) AS name,
+    #   group_id AS group_id,
+    #   name AS user_name
     # FROM
     #   user u
     #   LEFT JOIN (
@@ -622,12 +634,86 @@ SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in syntax to S
     # WHERE
     #   u.user_id = ?
     #   AND b.balance BETWEEN ? AND ?
-    # GROUP BY LEFT(name, ?)'
-    # @bind: (5, 1, 2, 101, 100, 200, 2)
+    #   AND (
+    #     group_id = ?
+    #     OR group_id = ?
+    #     OR group_id IN(?,?)
+    #   )
+    # GROUP BY LEFT(name, ?)
+    # ORDER BY name desc
+    # LIMIT ?
+    # @bind: (5, 1, 2, 7, 100, 200, 1, 2, 5, 6, 2, 10)
+
+
+    my ($stmt, @bind) = SQL
+        ->select('name')
+        ->from('user1')
+        ->union( SQL->select('name')->from('user2') )
+        ->to_sql
+    ;
+    # SELECT name FROM user1 UNION SELECT name FROM user2
+
+
+    my ($stmt, @bind) = SQL
+        ->update('user')
+        ->set(
+            status  => 'expired',
+            updated => \'NOW()',
+        )
+        ->where('(last_activity + INTERVAL ? DAY) < NOW()', 30)
+        ->to_sql
+    ;
+    # UPDATE user SET status=?, updated=NOW() WHERE (last_activity + INTERVAL ? DAY) < NOW()
+    # @bind: ('expired', 30)
+
+
+    my ($stmt, @bind) = SQL
+        ->insert('user',
+            name    => 'User',
+            status  => 'active',
+            updated => \'NOW()',
+        )
+        ->options(qw/LOW_PRIORITY IGNORE/)
+        ->to_sql
+    ;
+    # INSERT LOW_PRIORITY IGNORE user SET name=?, status=?, updated=NOW()
+    # @bind: ('User', 'active')
+
+
+    my $q1 = SQL
+        ->select(qw/user_id balance/)
+        ->from('balance')
+    ;
+    my $q2 = SQL
+        ->select(qw/
+            name
+            b.balance
+        /)
+        ->from('user')
+        ->left_join($q1, 'b')->using('user_id')->parent
+    ;
+    $q2->where('b.balance < 0') if 1;
+    my ($stmt, @bind) = $q2->to_sql(1);
+    # SELECT
+    #   name,
+    #   b.balance
+    # FROM
+    #   user
+    #   LEFT JOIN (
+    #     SELECT
+    #       user_id,
+    #       balance
+    #     FROM
+    #       balance
+    #   ) AS b
+    #   USING (user_id)
+    # WHERE
+    #   b.balance < 0
+
 
 =head1 DESCRIPTION
 
-SQL::QueryBuilder::Flex is yet another SQL builder class.
+SQL::QueryBuilder::Flex is yet another flexible SQL builder.
 
 =head1 METHODS
 

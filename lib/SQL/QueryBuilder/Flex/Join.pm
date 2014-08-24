@@ -2,7 +2,7 @@ package SQL::QueryBuilder::Flex::Join;
 
 use strict;
 use warnings;
-use SQL::QueryBuilder::Flex::CondList;
+use SQL::QueryBuilder::Flex::Exp;
 use base 'SQL::QueryBuilder::Flex::Statement';
 
 sub new {
@@ -32,7 +32,7 @@ sub on {
     my ($self, $condition, @values) = @_;
     die "The 'USING' clause is already defined"
         if scalar(@{ $self->{using} });
-    my $cond_list = $self->{on} ||= SQL::QueryBuilder::Flex::CondList->new(
+    my $cond_list = $self->{on} ||= SQL::QueryBuilder::Flex::Exp->new(
         parent => $self,
     );
     return $condition

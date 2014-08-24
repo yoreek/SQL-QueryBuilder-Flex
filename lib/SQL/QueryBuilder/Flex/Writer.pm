@@ -42,7 +42,7 @@ sub to_sql {
         ? join(
             "\n",
             map {
-                join('', ("\t") x $_->[1], $_->[0])
+                join('', ("  ") x $_->[1], $_->[0])
             } @{ $self->{_buffer} }
         )
         : join(

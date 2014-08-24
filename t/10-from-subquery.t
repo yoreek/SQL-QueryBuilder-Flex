@@ -5,17 +5,17 @@ use warnings;
 
 use Test::More tests => 1;
 
-use SQL::QueryBuilder::Flex 'Q';
+use SQL::QueryBuilder::Flex 'SQL';
 
 {
-    my $q = Q
+    my $q = SQL
         ->select(
             'name',
             'email',
         )
         ->from('user', 'u')
         ->from(
-            Q
+            SQL
                 ->select('group_name')
                 ->from('group')
             ,

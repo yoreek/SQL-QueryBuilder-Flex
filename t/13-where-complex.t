@@ -5,10 +5,10 @@ use warnings;
 
 use Test::More tests => 2;
 
-use SQL::QueryBuilder::Flex 'Q';
+use SQL::QueryBuilder::Flex 'SQL';
 
 {
-    my $q = Q
+    my $q = SQL
         ->select(
             'name',
             'email',
@@ -17,7 +17,7 @@ use SQL::QueryBuilder::Flex 'Q';
         ->where
             ->or('a = 1')
             ->or('b > ?', 2)
-            ->and_list
+            ->and_exp
                 ->or('c != ?', 10)
                 ->or('c != ?', 12)
         ->get_query

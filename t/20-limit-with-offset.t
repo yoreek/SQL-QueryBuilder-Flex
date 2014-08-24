@@ -5,10 +5,10 @@ use warnings;
 
 use Test::More tests => 4;
 
-use SQL::QueryBuilder::Flex 'Q';
+use SQL::QueryBuilder::Flex 'SQL';
 
 {
-    my $q = Q
+    my $q = SQL
         ->select(
             'name',
             'email',
@@ -31,7 +31,7 @@ use SQL::QueryBuilder::Flex 'Q';
 }
 
 {
-    my $q = Q
+    my $q = SQL
         ->select(
             'name',
             'email',

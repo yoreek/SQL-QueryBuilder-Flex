@@ -1,4 +1,4 @@
-package SQL::QueryBuilder::Flex::CondList;
+package SQL::QueryBuilder::Flex::Exp;
 
 use strict;
 use warnings;
@@ -7,7 +7,7 @@ use base 'SQL::QueryBuilder::Flex::Statement';
 sub new {
     my ($class, @options) = @_;
     my $self = $class->SUPER::new(
-        _conditions => [],
+        _childs => [],
         @options,
     );
     return $self;
@@ -15,26 +15,26 @@ sub new {
 
 sub is_empty {
     my ($self) = @_;
-    return scalar(@{ $self->{_conditions} }) ? 0 : 1;
+    return scalar(@{ $self->{_childs} }) ? 0 : 1;
 }
 
 sub or {
-    my ($self, $condition, @params) = @_;
+    my ($self, $exp, @params) = @_;
 
     # Create instance if this method has been called directly
     if (!ref $self) {
         $self = __PACKAGE__->new;
     }
 
-    push @{ $self->{_conditions} }, [ 'OR', $condition, @params ];
+    push @{ $self->{_childs} }, [ 'OR', $exp, @params ];
     return $self;
 }
 
-sub or_list {
+sub or_exp {
     my ($self) = @_;
-    my $new_cond_list = __PACKAGE__->new(parent => $self);
-    push @{ $self->{_conditions} }, [ 'OR', $new_cond_list ];
-    return $new_cond_list;
+    my $new_exp = __PACKAGE__->new(parent => $self);
+    push @{ $self->{_childs} }, [ 'OR', $new_exp ];
+    return $new_exp;
 }
 
 sub or_in {
@@ -44,9 +44,9 @@ sub or_in {
         return $self->or('0');
     }
 
-    my $condition = $name .' IN('. join(',', ('?') x @params) .')';
+    my $exp = $name .' IN('. join(',', ('?') x @params) .')';
 
-    return $self->or($condition, @params);
+    return $self->or($exp, @params);
 }
 
 sub or_not_in {
@@ -56,28 +56,28 @@ sub or_not_in {
         return $self->or('1');
     }
 
-    my $condition = $name .' NOT IN('. join(',', ('?') x @params) .')';
+    my $exp = $name .' NOT IN('. join(',', ('?') x @params) .')';
 
-    return $self->or($condition, @params);
+    return $self->or($exp, @params);
 }
 
 sub and {
-    my ($self, $condition, @params) = @_;
+    my ($self, $exp, @params) = @_;
 
     # Create instance if this method has been called directly
     if (!ref $self) {
         $self = __PACKAGE__->new;
     }
 
-    push @{ $self->{_conditions} }, [ 'AND', $condition, @params ];
+    push @{ $self->{_childs} }, [ 'AND', $exp, @params ];
     return $self;
 }
 
-sub and_list {
+sub and_exp {
     my ($self) = @_;
-    my $new_cond_list = __PACKAGE__->new(parent => $self);
-    push @{ $self->{_conditions} }, [ 'AND', $new_cond_list ];
-    return $new_cond_list;
+    my $new_exp = __PACKAGE__->new(parent => $self);
+    push @{ $self->{_childs} }, [ 'AND', $new_exp ];
+    return $new_exp;
 }
 
 sub and_in {
@@ -87,9 +87,9 @@ sub and_in {
         return $self->and('0');
     }
 
-    my $condition = $name .' IN('. join(',', ('?') x @params) .')';
+    my $exp = $name .' IN('. join(',', ('?') x @params) .')';
 
-    return $self->and($condition, @params);
+    return $self->and($exp, @params);
 }
 
 sub and_not_in {
@@ -99,9 +99,9 @@ sub and_not_in {
         return $self->and('1');
     }
 
-    my $condition = $name .' NOT IN('. join(',', ('?') x @params) .')';
+    my $exp = $name .' NOT IN('. join(',', ('?') x @params) .')';
 
-    return $self->and($condition, @params);
+    return $self->and($exp, @params);
 }
 
 sub do_build {
@@ -110,17 +110,17 @@ sub do_build {
     $indent ||= 0;
 
     my $is_first = 1;
-    foreach my $aItem (@{ $self->{_conditions} }) {
-        my ($op, $condition, @params) = @$aItem;
-        if (ref $condition) {
-            next if $condition->is_empty();
+    foreach my $child (@{ $self->{_childs} }) {
+        my ($op, $exp, @params) = @$child;
+        if (ref $exp) {
+            next if $exp->is_empty();
             my $str = $is_first ? '(' : join(' ', $op, '(');
             $writer->write($str, $indent);
-            $condition->build($writer, $indent + 1);
+            $exp->build($writer, $indent + 1);
             $writer->write(')', $indent);
         }
         else {
-            my $str = $is_first ? $condition : join(' ', $op, $condition);
+            my $str = $is_first ? $exp : join(' ', $op, $exp);
             $writer->write($str, $indent);
             $writer->add_params(@params);
         }
