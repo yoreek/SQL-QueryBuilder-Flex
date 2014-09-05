@@ -743,7 +743,7 @@ Yuriy Ustushenko, E<lt><yoreek@yahoo.com>E<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013 Yuriy Ustushenko
+Copyright (C) 2014 Yuriy Ustushenko
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
