@@ -1,6 +1,5 @@
 NAME
-    SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in
-    syntax to SQL
+    SQL::QueryBuilder::Flex - Yet another flexible SQL builder
 
 SYNOPSIS
         use SQL::QueryBuilder::Flex 'SQL';

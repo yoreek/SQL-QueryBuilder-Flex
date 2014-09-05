@@ -557,7 +557,7 @@ __END__
 
 =head1 NAME
 
-SQL::QueryBuilder::Flex - Yet another SQL builder that is similar in syntax to SQL
+SQL::QueryBuilder::Flex - Yet another flexible SQL builder
 
 =head1 SYNOPSIS
 
