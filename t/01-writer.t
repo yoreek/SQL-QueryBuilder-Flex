@@ -32,7 +32,7 @@ can_ok($package, qw/
     $writer->write('Test3', 2);
     is
         $writer->to_sql(1),
-        "Test1\n\tTest2\n\t\tTest3",
+        "Test1\n  Test2\n    Test3",
         'checking to_sql with indent'
     ;
 }
